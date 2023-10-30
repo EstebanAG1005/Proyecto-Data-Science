@@ -11,3 +11,9 @@ Donde dentro de la carpeta de Train se encuentran los 3 archvios generados que t
 Donde dentro de cada carpeta se pueden observar de esta manera los clips
 
 ![image](https://github.com/EstebanAG1005/Proyecto-Data-Science/assets/60299338/6680ccfb-2001-4009-95c5-4e7f4290b157)
+
+Para los Resultados Iniciales se muestra lo siguiente
+
+1. El archivo Prepering_the_data.ipynb: donde en esta parte se hicieron las modificaciones a la data como pasar los videos a frames y poder tener nuestra data lista para que sea entrenada
+2. El archivo Deep Learning model.ipynb: donde se usa el modelo VGG16 para poder obtener resultados.
+3. El archivo CNN.ipynb donde se realiza el mismo procesamiento que en del VGG16 pero usando lo que es una CNN comun.
