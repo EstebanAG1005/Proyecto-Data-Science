@@ -1,16 +1,84 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <title>Image Classification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        div {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"], select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+    </style>
+</head>
 <body>
-
-<h2>Upload Image</h2>
-<form action="/" method="post" enctype="multipart/form-data">
-    <input type="file" name="image" required>
-    <input type="submit" value="Upload and Predict">
-</form>
-
-{% if prediction %}
-    <h3>Prediction: {{ prediction }}</h3>
-{% endif %}
-
+    <form method="post" enctype="multipart/form-data">
+        <div>
+            <label for="imageUpload">Cargar imagen:</label>
+            <input type="file" name="image" id="imageUpload" required>
+        </div>
+        <div>
+            <label for="modelChoice">Seleccionar modelo:</label>
+            <select name="model_choice" id="modelChoice">
+                <option value="cnn">CNN</option>
+                <option value="vgg16">VGG16</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit">Predecir</button>
+        </div>
+    </form>
+    
+    {% if prediction %}
+        <h2>Resultado de la Predicción: {{ prediction }}</h2>
+    {% endif %}    
 </body>
 </html>
+
