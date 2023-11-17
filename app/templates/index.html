@@ -11,6 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
         }
 
@@ -19,6 +20,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         div {
@@ -55,6 +57,26 @@
         h2 {
             text-align: center;
             color: #333;
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .image-container img {
+            max-width: 600px;
+            margin: 10px;
+        }
+
+        .image-container p {
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            color: #555;
         }
     </style>
 </head>
@@ -77,8 +99,24 @@
     </form>
     
     {% if prediction %}
-        <h2>Resultado de la Predicción: {{ prediction }}</h2>
-    {% endif %}    
+    <h2>Resultado de la Predicción: {{ prediction }}</h2>
+    {% if prediction_time %}
+        <p>Tiempo de predicción: {{ prediction_time }} segundos</p>
+    {% endif %}
+    {% if model %}
+        <p>Modelo utilizado: {{ model }}</p>
+    {% endif %}
+    <div class="image-container">
+        <div>
+            <img src="{{ image1 }}" alt="Image 1">
+            <p>Gráfica de CNN</p>
+        </div>
+        <div>
+            <img src="{{ image2 }}" alt="Image 2">
+            <p>Gráfica de VGG16</p>
+        </div>
+    </div>
+{% endif %}
+   
 </body>
 </html>
-

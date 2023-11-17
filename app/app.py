@@ -1,16 +1,19 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, url_for
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.keras.applications.vgg16 import preprocess_input, VGG16  # Importar VGG16 aquí
 import numpy as np
 import os
 import pickle
+import time
 
 app = Flask(__name__)
 
 # Cargar el modelo
 model_cnn = load_model('./cnn.h5')
 model_vgg16 = load_model('./vgg16.h5')
+#Variable para predicción de tiempo
+PREDICTION_TIME = 0
 
 with open('class_mapping.pkl', 'rb') as f:
         class_mapping = pickle.load(f)
@@ -24,6 +27,7 @@ with open('class_mapping.pkl', 'rb') as f:
 
 # Función para predecir la clase de la imagen
 def predict_class_vgg16(image_path):
+    start_time = time.time()
     # Cargar la imagen y preprocesarla
     img = load_img(image_path, target_size=(224, 224))
     img = img_to_array(img)
@@ -45,10 +49,13 @@ def predict_class_vgg16(image_path):
     result = np.argmax(prediction, axis=1)
     print("Resultado de la predicción:", result)
     print("Mapeo de clases:", class_mapping)
-
-    return class_mapping[result[0]]
+    end_time = time.time()
+    prediction_time = end_time - start_time
+    model="VGG16"
+    return class_mapping[result[0]], prediction_time, model
 
 def predict_class_cnn(image_path):
+    start_time = time.time()
     img = load_img(image_path, target_size=(224, 224))
     img = img_to_array(img)
     img = np.expand_dims(img, axis=0)
@@ -57,12 +64,22 @@ def predict_class_cnn(image_path):
     # Aquí puedes procesar la salida de 'prediction' según sea necesario
     result = np.argmax(prediction, axis=1)
     predicted_class_name = inverted_class_mapping[result[0]]
-    return predicted_class_name  # Just return the result
+    end_time = time.time()
+    prediction_time = end_time - start_time
+    model="CNN"
+    return predicted_class_name, prediction_time, model
     
 @app.route('/', methods=['GET', 'POST'])
 def upload_predict():
-    predicted_class = None  # Initialize with None
-
+    predicted_class = None
+    image1 = url_for('static', filename='graphs/cnn.jpeg')
+    image2 = url_for('static', filename='graphs/vgg16.jpeg')
+    prediction_time = None
+    model = ""
+    
+    if not os.path.exists('images'):
+        os.makedirs('images')
+        
     if request.method == 'POST':
         image_file = request.files['image']
         model_choice = request.form.get('model_choice')
@@ -72,13 +89,14 @@ def upload_predict():
             image_file.save(image_path)
 
             if model_choice == 'cnn':
-                predicted_class = predict_class_cnn(image_path)
+                predicted_class, prediction_time, model = predict_class_cnn(image_path)
             elif model_choice == 'vgg16':
-                predicted_class = predict_class_vgg16(image_path)
+                predicted_class, prediction_time, model = predict_class_vgg16(image_path)
             else:
                 predicted_class = "Modelo no seleccionado correctamente."
 
-    return render_template('index.html', prediction=predicted_class)
+    return render_template('index.html', prediction=predicted_class, image1=image1, image2=image2, prediction_time=prediction_time, model=model)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
