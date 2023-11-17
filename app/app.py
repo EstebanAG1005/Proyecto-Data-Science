@@ -84,7 +84,10 @@ def predict_class_cnn(image_path):
     # Aquí puedes procesar la salida de 'prediction' según sea necesario
     result = np.argmax(prediction, axis=1)
     predicted_class_name = inverted_class_mapping[result[0]]
-    return predicted_class_name  # Just return the result
+    end_time = time.time()
+    prediction_time = end_time - start_time
+    model="CNN"
+    return predicted_class_name, prediction_time, model  # Just return the result
     
 @app.route('/', methods=['GET', 'POST'])
 def upload_predict():
@@ -108,7 +111,7 @@ def upload_predict():
             if model_choice == 'cnn':
                 predicted_class, prediction_time, model = predict_class_cnn(image_path)
             elif model_choice == 'vgg16':
-                predicted_class = predict_class_vgg16(image_path)
+                predicted_class, prediction_time, model = predict_class_vgg16(image_path)
             else:
                 predicted_class = "Modelo no seleccionado correctamente."
 
