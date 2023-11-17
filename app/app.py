@@ -14,9 +14,9 @@ import time
 app = Flask(__name__)
 
 # Cargar el modelo
-# model_cnn = load_model('./cnn.h5')
-model_vgg16 = load_model('../VGG16.h5')
-# modelo__autogluon = TabularPredictor.load("../AutogluonModels/ag-20231116_225431", require_py_version_match=False)
+model_cnn = load_model('./cnn.h5')
+model_vgg16 = load_model('./VGG16.h5')
+modelo__autogluon = TabularPredictor.load("../AutogluonModels/ag-20231116_225431", require_py_version_match=False)
 
 with open('class_mapping.pkl', 'rb') as f:
         class_mapping = pickle.load(f)
@@ -31,6 +31,7 @@ with open('class_mapping.pkl', 'rb') as f:
 
 
 def preparar_imagen_para_modelo_tabular(ruta_imagen, modelo, target_size=(224, 224, 3)):
+    start_time = time.time()
     # Cargar y preprocesar la imagen
     img = load_img(ruta_imagen, target_size=target_size)
     img = img_to_array(img) / 255
@@ -43,7 +44,10 @@ def preparar_imagen_para_modelo_tabular(ruta_imagen, modelo, target_size=(224, 2
 
     # Hacer la predicción
     pred = modelo.predict(df)
-    return pred
+    end_time = time.time()
+    prediction_time = end_time - start_time
+    model = "Autogluon"
+    return pred, prediction_time, model
 
 # Función para predecir la clase de la imagen
 def predict_class_vgg16(image_path):
@@ -88,7 +92,13 @@ def predict_class_cnn(image_path):
     prediction_time = end_time - start_time
     model="CNN"
     return predicted_class_name, prediction_time, model  # Just return the result
-    
+
+def predict_class_autogluon(image_path):
+    predicted_class, prediction_time, model = preparar_imagen_para_modelo_tabular(image_path, modelo__autogluon)
+    # Convertir la predicción (que es una serie de Pandas) a un valor único o cadena
+    predicted_class_str = predicted_class.iloc[0] if not predicted_class.empty else "No prediction"
+    return str(predicted_class_str), prediction_time, model
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_predict():
     predicted_class = None
@@ -112,6 +122,8 @@ def upload_predict():
                 predicted_class, prediction_time, model = predict_class_cnn(image_path)
             elif model_choice == 'vgg16':
                 predicted_class, prediction_time, model = predict_class_vgg16(image_path)
+            elif model_choice == 'autogluon':
+                predicted_class, prediction_time, model = predict_class_autogluon(image_path)
             else:
                 predicted_class = "Modelo no seleccionado correctamente."
 
