@@ -14,9 +14,9 @@ import time
 app = Flask(__name__)
 
 # Cargar el modelo
-model_cnn = load_model('./cnn.h5')
-model_vgg16 = load_model('./vgg16.h5')
-modelo__autogluon = TabularPredictor.load("../AutogluonModels/ag-20231116_225431", require_py_version_match=False)
+# model_cnn = load_model('./cnn.h5')
+model_vgg16 = load_model('../VGG16.h5')
+# modelo__autogluon = TabularPredictor.load("../AutogluonModels/ag-20231116_225431", require_py_version_match=False)
 
 with open('class_mapping.pkl', 'rb') as f:
         class_mapping = pickle.load(f)
