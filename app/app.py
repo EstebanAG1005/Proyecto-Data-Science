@@ -2,6 +2,10 @@ from flask import Flask, request, render_template, url_for
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.keras.applications.vgg16 import preprocess_input, VGG16  # Importar VGG16 aquí
+import os
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
+import pandas as pd
+from autogluon.tabular import TabularPredictor
 import numpy as np
 import os
 import pickle
@@ -12,8 +16,7 @@ app = Flask(__name__)
 # Cargar el modelo
 model_cnn = load_model('./cnn.h5')
 model_vgg16 = load_model('./vgg16.h5')
-#Variable para predicción de tiempo
-PREDICTION_TIME = 0
+modelo__autogluon = TabularPredictor.load("../AutogluonModels/ag-20231116_225431", require_py_version_match=False)
 
 with open('class_mapping.pkl', 'rb') as f:
         class_mapping = pickle.load(f)
@@ -24,6 +27,23 @@ inverted_class_mapping = {v: k for k, v in class_mapping.items()}
 with open('class_mapping.pkl', 'rb') as f:
     class_mapping = pickle.load(f)
     class_mapping = {v: k for k, v in class_mapping.items()}
+
+
+
+def preparar_imagen_para_modelo_tabular(ruta_imagen, modelo, target_size=(224, 224, 3)):
+    # Cargar y preprocesar la imagen
+    img = load_img(ruta_imagen, target_size=target_size)
+    img = img_to_array(img) / 255
+
+    # Aplanar la imagen
+    img_flattened = img.reshape(1, -1)
+
+    # Crear un DataFrame
+    df = pd.DataFrame(img_flattened)
+
+    # Hacer la predicción
+    pred = modelo.predict(df)
+    return pred
 
 # Función para predecir la clase de la imagen
 def predict_class_vgg16(image_path):
@@ -64,10 +84,7 @@ def predict_class_cnn(image_path):
     # Aquí puedes procesar la salida de 'prediction' según sea necesario
     result = np.argmax(prediction, axis=1)
     predicted_class_name = inverted_class_mapping[result[0]]
-    end_time = time.time()
-    prediction_time = end_time - start_time
-    model="CNN"
-    return predicted_class_name, prediction_time, model
+    return predicted_class_name  # Just return the result
     
 @app.route('/', methods=['GET', 'POST'])
 def upload_predict():
@@ -91,7 +108,7 @@ def upload_predict():
             if model_choice == 'cnn':
                 predicted_class, prediction_time, model = predict_class_cnn(image_path)
             elif model_choice == 'vgg16':
-                predicted_class, prediction_time, model = predict_class_vgg16(image_path)
+                predicted_class = predict_class_vgg16(image_path)
             else:
                 predicted_class = "Modelo no seleccionado correctamente."
 
